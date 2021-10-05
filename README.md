@@ -1,5 +1,5 @@
-# web5-Passport
-생활코딩 Web-5 passport를 학습하는 레포
+# web6-MultiUser
+생활코딩 Web6 - Multiuser 를 학습하는 레포
 
 
 Node.js 웹 프레임워크인 Express에서 Passport, lowdb, bcrypt를 사용하여 다중 사용자 시스템을 구축.
