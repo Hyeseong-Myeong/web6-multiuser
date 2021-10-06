@@ -5,6 +5,15 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var fs = require('fs');
 
+const low = require('lowdb')
+const FileSync = require('lowdb/adapters/FileSync')
+
+var shortid = require('shortid')
+
+const adapter = new FileSync('db.json')
+const db = low(adapter)
+db.defaults({users:[]}).write();
+
 
 module.exports = function(passport){
   router.get('/login', function(request, response){
@@ -50,15 +59,6 @@ module.exports = function(passport){
     }
   });
   */
-  
-  /*login session save - not working
-  app.post('/auth/login_process', 
-    passport.authenticate('local', {
-      successRedirect: '/',
-      failureRedirect: '/auth/login',
-      failureFlash:true
-    })
-  );*/
   router.post('/login_process',
     passport.authenticate('local', {
       failureRedirect: '/auth/login',
@@ -91,6 +91,27 @@ module.exports = function(passport){
       </form>
     `, '');
     response.send(html);
+  });
+
+  router.post('/register_process', function(request, response){
+    var post = request.body;
+    var email = post.email;
+    var pwd = post.pwd;
+    var pwd2 = post.pwd2;
+    var displayName = post.displayName;
+
+    if(pwd !== pwd2){
+      request.flash('error', 'Password must same');
+      response.redirect('/auth/register');
+    }else {
+      db.get('users').push({
+        id:shortid.generate(),
+        email: email,
+        password: pwd,
+        displayName:displayName
+      }).write();
+      response.redirect('/');
+    }
   });
   
   router.get('/logout', function(request, response){
