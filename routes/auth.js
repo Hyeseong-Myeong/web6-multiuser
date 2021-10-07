@@ -5,15 +5,9 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 var fs = require('fs');
 
-const low = require('lowdb')
-const FileSync = require('lowdb/adapters/FileSync')
-
 var shortid = require('shortid')
 
-const adapter = new FileSync('db.json')
-const db = low(adapter)
-db.defaults({users:[]}).write();
-
+var db = require('../lib/db.js');
 
 module.exports = function(passport){
   router.get('/login', function(request, response){
@@ -104,13 +98,16 @@ module.exports = function(passport){
       request.flash('error', 'Password must same');
       response.redirect('/auth/register');
     }else {
-      db.get('users').push({
+      var user={
         id:shortid.generate(),
         email: email,
         password: pwd,
         displayName:displayName
-      }).write();
-      response.redirect('/');
+      };
+      db.get('users').push(user).write();
+      request.logIn(user, function(err){
+        return response.redirect('/');
+      })
     }
   });
   
