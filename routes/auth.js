@@ -6,9 +6,10 @@ var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 
 var shortid = require('shortid');
-const password = require('../password.js');
 var db = require('../lib/db')
 
+var bcrypt = require('bcrypt');
+var saltRound = 10;
 module.exports = function (passport) {
   router.get('/login', function (request, response) {
     var fmsg = request.flash();
@@ -74,16 +75,18 @@ router.post('/register_process', function (request, response) {
     request.flash('error', 'Password must same!');
     response.redirect('/auth/register');
   }else {
-    var user = {
+    bcrypt.hash(pwd, saltRound, function(err, hash){
+      var user = {
         id:shortid.generate(),
         email: email,
-        password: pwd,
+        password: hash,
         displayName:displayName
     };
     db.get('users').push(user).write();
     request.login(user, function(err) {
       console.log('redirect');
       return response.redirect('/');
+    })
     })
   }
   //추가 구현 사항: 중복사용자 확인 
